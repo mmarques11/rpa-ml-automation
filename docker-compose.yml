@@ -1,0 +1,74 @@
+version: '3.8'
+services:
+  inference:
+    build:
+      context: .
+      dockerfile: services/inference/Dockerfile
+    image: rpa-inference:local
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    volumes:
+      - ./services/inference:/app
+    working_dir: /app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  rpa-runner:
+    build:
+      context: .
+      dockerfile: services/rpa/Dockerfile
+    image: rpa-runner:local
+    depends_on:
+      - inference
+    restart: "no"
+  minio:
+    image: minio/minio:latest
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./data:/data
+
+  ingestor:
+    build:
+      context: .
+      dockerfile: services/ingestor/Dockerfile
+    image: rpa-ingestor:local
+    depends_on:
+      - inference
+      - minio
+    environment:
+      DATA_DIR: /data
+      LAT: "52.52"
+      LON: "13.41"
+      DAYS: "7"
+      MINIO_ENDPOINT: "http://minio:9000"
+      MINIO_ACCESS_KEY: "minioadmin"
+      MINIO_SECRET_KEY: "minioadmin"
+      MINIO_BUCKET: "ingest"
+    volumes:
+      - ./data:/data
+
+  processor:
+    build:
+      context: .
+      dockerfile: services/processor/Dockerfile
+    image: rpa-processor:local
+    depends_on:
+      - inference
+    environment:
+      DATA_DIR: /data
+      INFERENCE_URL: "http://inference:8000/predict"
+      SMTP_SERVER: "smtp.gmail.com"
+      SMTP_PORT: "587"
+      SENDER_EMAIL: ${SENDER_EMAIL}
+      SENDER_PASSWORD: ${SENDER_PASSWORD}
+      RECIPIENT_EMAIL: ${RECIPIENT_EMAIL}
+    volumes:
+      - ./data:/data
+      - ./services/processor:/app
+    working_dir: /app
+    restart: "no"

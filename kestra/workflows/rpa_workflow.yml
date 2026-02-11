@@ -1,0 +1,18 @@
+id: rpa-inference-workflow
+namespace: rpa-project
+name: rpa-inference-workflow
+
+tasks:
+  - id: trigger-rpa
+    type: io.kestra.core.tasks.scripts.Bash
+    properties:
+      commands:
+        - echo "Starting RPA workflow"
+        - "curl -sS http://inference:8000/health"
+
+  - id: run-rpa
+    type: io.kestra.core.tasks.scripts.Bash
+    properties:
+      commands:
+        - echo "Would run RPA runner container here (example)"
+        - "# In production use Kestra's Kubernetes/HTTP plugins to run containers or call services"

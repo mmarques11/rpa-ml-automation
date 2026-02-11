@@ -1,0 +1,7 @@
+[tool.poetry]
+name = "rpa-ml-project"
+version = "0.1.0"
+description = "Scaffold RPA + ML"
+
+[tool.black]
+line-length = 88

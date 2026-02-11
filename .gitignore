@@ -1,0 +1,23 @@
+__pycache__/
+.env
+.env.*
+.venv/
+*.pyc
+dist/
+build/
+*.egg-info/
+.env
+.DS_Store
+.instance
+.idea/
+.vscode/
+
+# Docker
+**/__pycache__
+**/*.pyc
+**/pip-wheel-metadata/
+**/dist/
+**/build/
+
+# Local artifacts
+services/inference/model_artifacts/
