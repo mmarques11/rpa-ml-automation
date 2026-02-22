@@ -72,7 +72,7 @@ Workflow:
 
 ## Variaveis de ambiente
 
-Crie um arquivo `.env` local (nao comitar) para envio de email:
+Crie um arquivo `.env` local para envio de email:
 
 ```env
 SENDER_EMAIL=seu-email@gmail.com
