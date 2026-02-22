@@ -82,11 +82,6 @@ SMTP_SERVER=smtp.gmail.com
 SMTP_PORT=587
 ```
 
-Notas:
-
-- O MinIO usa credenciais default por desenvolvimento. Troque para uso publico/prod.
-- A senha do Kestra esta em texto puro no compose; altere antes de abrir o repo ao publico.
-
 ## CI/CD
 
 O workflow de CI em `.github/workflows/ci.yml` executa:
