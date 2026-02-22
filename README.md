@@ -1,6 +1,6 @@
 # RPA + ML Project
 
-Projeto de automacao RPA integrado com pipeline de ML, com servicos desacoplados em Docker e orquestracao via Kestra.
+Projeto de automação RPA integrado com pipeline de ML, com servicos desacoplados em Docker e orquestracao via Kestra.
 
 ## Arquitetura
 
