@@ -1,41 +1,42 @@
 # RPA + ML Project
 
-Projeto de automação RPA integrado com pipeline de ML, padronizado com práticas de engenharia de software:
-
-- serviços desacoplados em Docker
-- testes automatizados locais e em container
-- CI/CD com GitHub Actions
-- orquestração de pipeline com Kestra
+Projeto de automacao RPA integrado com pipeline de ML, com servicos desacoplados em Docker e orquestracao via Kestra.
 
 ## Arquitetura
 
-- `services/inference/`: API FastAPI com endpoints de saúde e inferência
-- `services/ingestor/`: coleta de dados externos (Open-Meteo) e persistência local/MinIO
-- `services/processor/`: etapa ML (treino, predição, gráfico e envio opcional de e-mail)
-- `services/rpa/`: runner RPA de integração com a API de inferência
-- `kestra/workflows/`: orquestração do fluxo ponta a ponta
+- `services/inference/`: API FastAPI com endpoints de saude e inferencia
+- `services/ingestor/`: coleta de dados (Open-Meteo) e persistencia local/MinIO
+- `services/processor/`: ML (treino, predicao, grafico e envio opcional de e-mail)
+- `services/rpa/`: runner RPA integrando com a API de inferencia
+- `kestra/workflows/`: orquestracao do fluxo ponta a ponta
 - `.github/workflows/`: pipeline CI/CD
 
 Fluxo principal:
 
 1. `ingestor` coleta e salva dados em `data/`
 2. `processor` treina modelo e gera artefatos
-3. `rpa-runner` consome inferência para automação
-4. Kestra coordena a sequência e observabilidade
+3. `rpa-runner` consome inferencia para automacao
+4. Kestra coordena a sequencia e observabilidade
+
+## Requisitos
+
+- Docker Desktop (com Compose v2)
+- Python 3.10+ (opcional, apenas para testes locais)
 
 ## Como executar localmente
 
+Subir servicos base:
+
 ```bash
-cd c:/Users/mateu/Documents/Projetos/Python/RPA
 docker compose up --build -d inference minio
 ```
 
-Executar o pipeline manual:
+Executar o pipeline manualmente:
 
 ```bash
-docker compose run --rm ingestor
-docker compose run --rm processor
-docker compose run --rm rpa-runner
+docker compose run --rm --no-deps ingestor
+docker compose run --rm --no-deps processor
+docker compose run --rm --no-deps rpa-runner
 ```
 
 ## Testes
@@ -52,7 +53,7 @@ Executar testes em Docker:
 docker compose run --rm tests
 ```
 
-## Orquestração com Kestra
+## Orquestracao com Kestra
 
 Subir Kestra:
 
@@ -67,25 +68,42 @@ Interface web:
 Workflow:
 
 - `kestra/workflows/rpa_workflow.yml`
-- sequência: health-check → ingestor → processor → rpa-runner
+- sequencia: health-check → ingestor → processor → rpa-runner
+
+## Variaveis de ambiente
+
+Crie um arquivo `.env` local (nao comitar) para envio de email:
+
+```env
+SENDER_EMAIL=seu-email@gmail.com
+SENDER_PASSWORD=sua-senha-app
+RECIPIENT_EMAIL=destinatario@example.com
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+```
+
+Notas:
+
+- O MinIO usa credenciais default por desenvolvimento. Troque para uso publico/prod.
+- A senha do Kestra esta em texto puro no compose; altere antes de abrir o repo ao publico.
 
 ## CI/CD
 
 O workflow de CI em `.github/workflows/ci.yml` executa:
 
-1. instalação de dependências
-2. validação de formatação (`black`, `isort`)
-3. testes unitários (`pytest`)
+1. instalacao de dependencias
+2. validacao de formatacao (`black`, `isort`)
+3. testes unitarios (`pytest`)
 4. build das imagens Docker
 5. testes em container (`docker compose run --rm tests`)
 
-## Qualidade de Código
+## Qualidade de Codigo
 
-- formatação: `black`
-- organização de imports: `isort`
+- formatacao: `black`
+- organizacao de imports: `isort`
 - ganchos locais: `pre-commit`
 
-Instalação sugerida:
+Instalacao sugerida:
 
 ```bash
 pip install pre-commit
