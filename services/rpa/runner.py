@@ -1,7 +1,8 @@
-import requests
 import time
 
-INFERENCE_URL = 'http://inference:8000/predict'
+import requests
+
+INFERENCE_URL = "http://inference:8000/predict"
 
 
 def run_job(text: str):
@@ -13,12 +14,12 @@ def run_job(text: str):
         print("Inference call failed:", e)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Exemplo simples: roda periodicamente
     samples = [
-        'Olá mundo',
-        'Este é um texto de teste para avaliar o scorer do modelo dummy',
-        'Curto'
+        "Olá mundo",
+        "Este é um texto de teste para avaliar o scorer do modelo dummy",
+        "Curto",
     ]
     for t in samples:
         run_job(t)

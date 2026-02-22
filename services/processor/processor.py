@@ -1,16 +1,17 @@
-import os
-import json
 import glob
-from datetime import datetime
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.linear_model import LinearRegression
+import json
+import os
 import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
-from email.mime.text import MIMEText
+from datetime import datetime
 from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+import matplotlib.pyplot as plt
+import numpy as np
 import requests
+from sklearn.linear_model import LinearRegression
 
 DATA_DIR = os.environ.get("DATA_DIR", "/data")
 INFERENCE_URL = os.environ.get("INFERENCE_URL", "http://inference:8000/predict")
@@ -60,9 +61,27 @@ def generate_graph(dates, y_actual, y_pred, temps_min, output_path):
     plt.style.use("seaborn-v0_8")
     x_idx = np.arange(len(dates))
 
-    ax.plot(x_idx, y_actual, "o-", label="Temperatura Máxima (Real)", linewidth=2.5, markersize=6, color="#1f77b4")
-    ax.plot(x_idx, y_pred, "s--", label="Temperatura Máxima (Prevista)", linewidth=2.5, markersize=6, color="#ff7f0e")
-    ax.fill_between(x_idx, temps_min, y_actual, alpha=0.25, label="Faixa Min–Máx", color="#2ca02c")
+    ax.plot(
+        x_idx,
+        y_actual,
+        "o-",
+        label="Temperatura Máxima (Real)",
+        linewidth=2.5,
+        markersize=6,
+        color="#1f77b4",
+    )
+    ax.plot(
+        x_idx,
+        y_pred,
+        "s--",
+        label="Temperatura Máxima (Prevista)",
+        linewidth=2.5,
+        markersize=6,
+        color="#ff7f0e",
+    )
+    ax.fill_between(
+        x_idx, temps_min, y_actual, alpha=0.25, label="Faixa Min–Máx", color="#2ca02c"
+    )
 
     ax.set_xlabel("Data")
     ax.set_ylabel("Temperatura (°C)")
@@ -96,7 +115,10 @@ def send_email(subject, body, attachment_path):
                 part = MIMEBase("application", "octet-stream")
                 part.set_payload(attachment.read())
                 encoders.encode_base64(part)
-                part.add_header("Content-Disposition", f"attachment; filename= {os.path.basename(attachment_path)}")
+                part.add_header(
+                    "Content-Disposition",
+                    f"attachment; filename= {os.path.basename(attachment_path)}",
+                )
                 msg.attach(part)
 
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
@@ -135,7 +157,9 @@ def run_pipeline():
 
     # Train model
     model = train_model(X, y)
-    print(f"Model trained (slope={model.coef_[0]:.3f}, intercept={model.intercept_:.3f})")
+    print(
+        f"Model trained (slope={model.coef_[0]:.3f}, intercept={model.intercept_:.3f})"
+    )
 
     # Predict
     y_pred = model.predict(X)
@@ -143,15 +167,21 @@ def run_pipeline():
     print(f"RMSE: {rmse:.3f}")
 
     # Call inference service for text-based prediction
-    inference_summary = call_inference(f"Temperature trend: max={y.max():.1f}C, min={y.min():.1f}C, avg={y.mean():.1f}C")
+    inference_summary = call_inference(
+        f"Temperature trend: max={y.max():.1f}C, min={y.min():.1f}C, avg={y.mean():.1f}C"
+    )
     print(f"Inference result: {inference_summary}")
 
     # Generate graph
-    graph_path = os.path.join(DATA_DIR, f"forecast_{datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}.png")
+    graph_path = os.path.join(
+        DATA_DIR, f"forecast_{datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}.png"
+    )
     generate_graph(dates, y, y_pred, temps_min, graph_path)
 
     # Send email
-    subject = f"Relatório de Previsão do Tempo - {datetime.utcnow().strftime('%Y-%m-%d')}"
+    subject = (
+        f"Relatório de Previsão do Tempo - {datetime.utcnow().strftime('%Y-%m-%d')}"
+    )
     body = f"""
 Relatório de Previsão do Tempo
 
