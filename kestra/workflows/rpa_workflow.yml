@@ -5,24 +5,38 @@ description: Orquestra pipeline RPA + ML com health check, ingestão e processam
 tasks:
   - id: health-check-inference
     type: io.kestra.plugin.scripts.shell.Commands
+    runner: PROCESS
     commands:
       - echo "Validando disponibilidade do serviço de inferência"
-      - curl -fsS http://inference:8000/health
+      - |
+        for i in $(seq 1 30); do
+          if curl -fsS http://inference:8000/health >/dev/null; then
+            echo "Inference disponível"
+            exit 0
+          fi
+          echo "Aguardando inference... tentativa ${i}/30"
+          sleep 2
+        done
+        echo "Inference indisponível após 60s"
+        exit 1
 
   - id: run-ingestor
     type: io.kestra.plugin.scripts.shell.Commands
+    runner: PROCESS
     commands:
       - echo "Executando ingestão"
-      - docker-compose -f /workspace/docker-compose.yml run --rm ingestor
+      - docker compose -p rpa -f /workspace/docker-compose.yml run --rm --no-deps ingestor
 
   - id: run-processor
     type: io.kestra.plugin.scripts.shell.Commands
+    runner: PROCESS
     commands:
       - echo "Executando processamento e etapa ML"
-      - docker-compose -f /workspace/docker-compose.yml run --rm processor
+      - docker compose -p rpa -f /workspace/docker-compose.yml run --rm --no-deps processor
 
   - id: run-rpa-runner
     type: io.kestra.plugin.scripts.shell.Commands
+    runner: PROCESS
     commands:
       - echo "Executando job RPA de exemplo"
-      - docker-compose -f /workspace/docker-compose.yml run --rm rpa-runner
+      - docker compose -p rpa -f /workspace/docker-compose.yml run --rm --no-deps rpa-runner

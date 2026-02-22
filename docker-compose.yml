@@ -82,7 +82,6 @@ services:
       RECIPIENT_EMAIL: ${RECIPIENT_EMAIL}
     volumes:
       - ./data:/data
-      - ./services/processor:/app
     working_dir: /app
     restart: "no"
 
