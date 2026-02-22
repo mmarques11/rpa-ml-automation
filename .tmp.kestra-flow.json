@@ -1,0 +1,39 @@
+﻿{
+  "id": "rpa-ml-pipeline",
+  "namespace": "rpa-project",
+  "description": "Orquestra pipeline RPA + ML com health check, ingestão e processamento.",
+  "tasks": [
+    {
+      "id": "health-check-inference",
+      "type": "io.kestra.plugin.scripts.shell.Commands",
+      "commands": [
+        "echo \"Validando disponibilidade do serviço de inferência\"",
+        "curl -fsS http://inference:8000/health"
+      ]
+    },
+    {
+      "id": "run-ingestor",
+      "type": "io.kestra.plugin.scripts.shell.Commands",
+      "commands": [
+        "echo \"Executando ingestão\"",
+        "docker-compose -f /workspace/docker-compose.yml run --rm ingestor"
+      ]
+    },
+    {
+      "id": "run-processor",
+      "type": "io.kestra.plugin.scripts.shell.Commands",
+      "commands": [
+        "echo \"Executando processamento e etapa ML\"",
+        "docker-compose -f /workspace/docker-compose.yml run --rm processor"
+      ]
+    },
+    {
+      "id": "run-rpa-runner",
+      "type": "io.kestra.plugin.scripts.shell.Commands",
+      "commands": [
+        "echo \"Executando job RPA de exemplo\"",
+        "docker-compose -f /workspace/docker-compose.yml run --rm rpa-runner"
+      ]
+    }
+  ]
+}

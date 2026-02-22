@@ -1,18 +1,28 @@
-id: rpa-inference-workflow
+id: rpa-ml-pipeline
 namespace: rpa-project
-name: rpa-inference-workflow
+description: Orquestra pipeline RPA + ML com health check, ingestão e processamento.
 
 tasks:
-  - id: trigger-rpa
-    type: io.kestra.core.tasks.scripts.Bash
-    properties:
-      commands:
-        - echo "Starting RPA workflow"
-        - "curl -sS http://inference:8000/health"
+  - id: health-check-inference
+    type: io.kestra.plugin.scripts.shell.Commands
+    commands:
+      - echo "Validando disponibilidade do serviço de inferência"
+      - curl -fsS http://inference:8000/health
 
-  - id: run-rpa
-    type: io.kestra.core.tasks.scripts.Bash
-    properties:
-      commands:
-        - echo "Would run RPA runner container here (example)"
-        - "# In production use Kestra's Kubernetes/HTTP plugins to run containers or call services"
+  - id: run-ingestor
+    type: io.kestra.plugin.scripts.shell.Commands
+    commands:
+      - echo "Executando ingestão"
+      - docker-compose -f /workspace/docker-compose.yml run --rm ingestor
+
+  - id: run-processor
+    type: io.kestra.plugin.scripts.shell.Commands
+    commands:
+      - echo "Executando processamento e etapa ML"
+      - docker-compose -f /workspace/docker-compose.yml run --rm processor
+
+  - id: run-rpa-runner
+    type: io.kestra.plugin.scripts.shell.Commands
+    commands:
+      - echo "Executando job RPA de exemplo"
+      - docker-compose -f /workspace/docker-compose.yml run --rm rpa-runner

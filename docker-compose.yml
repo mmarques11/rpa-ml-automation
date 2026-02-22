@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   inference:
     build:
@@ -21,6 +20,20 @@ services:
     depends_on:
       - inference
     restart: "no"
+
+  tests:
+    build:
+      context: .
+      dockerfile: services/inference/Dockerfile
+    image: rpa-tests:local
+    working_dir: /workspace
+    environment:
+      PYTHONPATH: /workspace
+    volumes:
+      - ./:/workspace
+    command: pytest -q
+    restart: "no"
+
   minio:
     image: minio/minio:latest
     environment:
@@ -72,3 +85,34 @@ services:
       - ./services/processor:/app
     working_dir: /app
     restart: "no"
+
+  kestra:
+    build:
+      context: .
+      dockerfile: services/kestra/Dockerfile
+    image: rpa-kestra:local
+    command: server standalone
+    user: "root"
+    ports:
+      - "8080:8080"
+    environment:
+      KESTRA_CONFIGURATION: |
+        kestra:
+          server:
+            basic-auth:
+              enabled: true
+              username: admin@local.dev
+              password: Admin1234
+          queue:
+            type: h2
+          repository:
+            type: h2
+          storage:
+            type: local
+            local:
+              base-path: /app/storage
+    volumes:
+      - ./:/workspace
+      - ./data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
